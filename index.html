@@ -5,105 +5,80 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-<meta name="theme-color" content="#0D1117">
+<meta name="theme-color" content="#08090C">
 <title>Crisis Tracker</title>
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 <style>
   * { box-sizing: border-box; margin: 0; padding: 0; }
-  body { background: #0D1117; color: #8BA0B8; font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; min-height: 100vh; min-height: 100dvh; overflow-x: hidden; -webkit-font-smoothing: antialiased; }
+  body { background: #08090C; color: #8899AA; font-family: 'SF Mono','Menlo','Consolas','Monaco',monospace; min-height: 100vh; min-height: 100dvh; overflow-x: hidden; -webkit-font-smoothing: antialiased; }
   ::-webkit-scrollbar { display: none; }
   input[type=number]::-webkit-inner-spin-button { -webkit-appearance: none; }
   input[type=number] { -moz-appearance: textfield; }
-  @keyframes pulse { 0%,100%{opacity:1}50%{opacity:.4} }
-  @keyframes goBorder { 0%,100%{box-shadow:inset 0 0 0 1px rgba(52,211,153,.2)} 50%{box-shadow:inset 0 0 0 1px rgba(52,211,153,.6),0 0 8px rgba(52,211,153,.1)} }
-  .header { padding:10px 12px 8px; border-bottom:1px solid #1E2C3D; display:flex; justify-content:space-between; align-items:center; position:sticky; top:0; background:#0D1117; z-index:20; }
-  .header-left { display:flex; align-items:center; gap:8px; }
-  .header-right { display:flex; gap:5px; align-items:center; }
-  .title { font-size:13px; font-weight:700; color:#E8EDF5; letter-spacing:-.2px; }
-  .badge { font-size:9px; color:#4A6080; background:#151E2B; padding:2px 6px; border-radius:4px; font-weight:600; }
-  .auto-dot { width:6px; height:6px; border-radius:50%; background:#34D399; animation:pulse 1.5s infinite; }
-  .go-count { font-size:9px; font-weight:700; color:#34D399; animation:pulse 2s infinite; }
-  .hot-count { font-size:9px; font-weight:700; color:#FBB040; }
-  .btn { border:none; border-radius:5px; font-size:9px; font-weight:700; cursor:pointer; font-family:inherit; padding:4px 10px; }
-  .btn-refresh { background:#2563EB; color:#fff; }
-  .btn-refresh.loading { background:#1A2535; color:#4A6080; }
-  .btn-auto { background:#1A2535; color:#4A6080; padding:4px 8px; }
-  .btn-auto.active { background:#0D3B2C; color:#6EE7B7; }
-  .btn-sort { background:transparent; color:#344860; border:none; padding:3px 6px; border-radius:4px; font-size:8px; cursor:pointer; font-family:inherit; text-transform:uppercase; font-weight:700; letter-spacing:.4px; }
-  .btn-sort.active { background:#192744; color:#7CB3F5; }
-  .updated { padding:2px 12px 3px; font-size:9px; color:#2E4055; }
-  .col-header { display:grid; grid-template-columns:10px 52px 60px 60px 46px; padding:5px 12px; font-size:8px; font-weight:700; color:#344860; letter-spacing:.6px; text-transform:uppercase; border-bottom:1px solid #161F2C; position:sticky; top:60px; background:#0D1117; z-index:10; }
-  .bucket-header { padding:6px 12px; font-size:9px; font-weight:700; border-left-width:2px; border-left-style:solid; background:rgba(255,255,255,.02); display:flex; justify-content:space-between; letter-spacing:.2px; }
-  .at-target { color:#34D399; font-size:8px; font-weight:700; }
-  .row { display:grid; grid-template-columns:10px 52px 60px 60px 46px; padding:8px 12px; align-items:center; cursor:pointer; border-bottom:1px solid #141C28; transition: background .1s; }
-  .row:hover { background:#131B27; }
-  .row.go { background:rgba(52,211,153,.08); animation:goBorder 2s infinite; }
-  .row.go:hover { background:rgba(52,211,153,.12); }
-  .row.hot { background:rgba(251,176,64,.05); }
-  .row.hot:hover { background:rgba(251,176,64,.08); }
-  .signal-dot { width:7px; height:7px; border-radius:50%; display:inline-block; flex-shrink:0; }
-  .signal-dot.go { background:#34D399; box-shadow:0 0 6px rgba(52,211,153,.7); }
-  .signal-dot.hot { background:#FBB040; box-shadow:0 0 4px rgba(251,176,64,.5); }
-  .signal-dot.wrm { background:#818CF8; }
-  .signal-dot.none { background:#1E2C3D; }
-  .ticker { font-size:12px; font-weight:700; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
-  .ticker.go { color:#34D399; } .ticker.hot { color:#FCD34D; } .ticker.default { color:#C8D8E8; }
-  .now-cell { display:flex; flex-direction:column; align-items:flex-end; gap:1px; }
-  .now-input { background:transparent; border:none; border-bottom:1px dotted #253345; color:#D8E6F4; font-size:12px; font-family:inherit; padding:1px 0; width:58px; text-align:right; font-weight:600; }
-  .now-input:focus { outline:none; border-bottom-color:#4A7FAA; }
-  .delta { font-size:9px; font-weight:600; line-height:1; }
-  .delta.up { color:#34D399; } .delta.down { color:#F87171; }
-  .tgt { text-align:right; font-size:11px; font-weight:500; color:#5A7A95; }
+  @keyframes pulse { 0%,100%{opacity:1}50%{opacity:.3} }
+  @keyframes goBorder { 0%,100%{box-shadow:inset 0 0 0 1px rgba(16,185,129,.25)} 50%{box-shadow:inset 0 0 0 1px rgba(16,185,129,.7),0 0 6px rgba(16,185,129,.12)} }
+  .header { padding:8px 8px 6px; border-bottom:1px solid #13161E; display:flex; justify-content:space-between; align-items:center; position:sticky; top:0; background:#08090C; z-index:20; }
+  .header-left { display:flex; align-items:center; gap:6px; }
+  .header-right { display:flex; gap:4px; align-items:center; }
+  .title { font-size:11px; font-weight:700; color:#E2E8F0; letter-spacing:-.3px; }
+  .badge { font-size:8px; color:#3A4050; background:#10131A; padding:1px 4px; border-radius:2px; }
+  .auto-dot { width:5px; height:5px; border-radius:50%; background:#10B981; animation:pulse 1.5s infinite; }
+  .go-count { font-size:8px; font-weight:700; color:#10B981; animation:pulse 2s infinite; }
+  .hot-count { font-size:8px; font-weight:700; color:#F59E0B; }
+  .btn { border:none; border-radius:3px; font-size:8px; font-weight:700; cursor:pointer; font-family:inherit; padding:3px 8px; }
+  .btn-refresh { background:#1D4ED8; color:#fff; }
+  .btn-refresh.loading { background:#10131A; color:#3A4050; }
+  .btn-auto { background:#10131A; color:#3A4050; padding:3px 6px; }
+  .btn-auto.active { background:#065F46; color:#6EE7B7; }
+  .btn-sort { background:transparent; color:#2A3040; border:none; padding:3px 5px; border-radius:2px; font-size:7px; cursor:pointer; font-family:inherit; text-transform:uppercase; font-weight:700; letter-spacing:.3px; }
+  .btn-sort.active { background:#1A2744; color:#7CB3F5; }
+  .updated { padding:1px 8px 2px; font-size:7px; color:#1E2530; }
+  .col-header { display:grid; grid-template-columns:10px 52px 60px 60px 46px; padding:4px 8px; font-size:7px; font-weight:700; color:#2A3040; letter-spacing:.5px; text-transform:uppercase; border-bottom:1px solid #0E1118; position:sticky; top:38px; background:#08090C; z-index:10; }
+  .bucket-header { padding:4px 8px; font-size:8px; font-weight:700; border-left-width:2px; border-left-style:solid; background:rgba(255,255,255,.01); display:flex; justify-content:space-between; letter-spacing:.3px; }
+  .at-target { color:#10B981; font-size:7px; }
+  .row { display:grid; grid-template-columns:10px 52px 60px 60px 46px; padding:6px 8px; align-items:center; cursor:pointer; border-bottom:1px solid #111318; }
+  .row.go { background:rgba(16,185,129,.1); animation:goBorder 2s infinite; }
+  .row.hot { background:rgba(245,158,11,.06); }
+  .signal-dot { width:6px; height:6px; border-radius:50%; display:inline-block; }
+  .signal-dot.go { background:#10B981; box-shadow:0 0 5px #10B981; }
+  .signal-dot.hot { background:#F59E0B; }
+  .signal-dot.wrm { background:#6366F1; }
+  .signal-dot.none { background:#222; }
+  .ticker { font-size:11px; font-weight:700; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+  .ticker.go { color:#34D399; } .ticker.hot { color:#FCD34D; } .ticker.default { color:#B8C0CC; }
+  .now-cell { display:flex; flex-direction:column; align-items:flex-end; }
+  .now-input { background:transparent; border:none; border-bottom:1px dotted #1A1F2A; color:#C8D0DA; font-size:11px; font-family:inherit; padding:1px 0; width:56px; text-align:right; font-weight:600; }
+  .delta { font-size:8px; font-weight:700; line-height:1; }
+  .delta.up { color:#10B981; } .delta.down { color:#EF4444; }
+  .tgt { text-align:right; font-size:10px; font-weight:500; color:#4A5568; }
   .tgt.go { color:#34D399; }
-  .gap { text-align:right; font-size:11px; font-weight:700; }
-  .gap.go { color:#34D399; } .gap.hot { color:#FBB040; } .gap.wrm { color:#818CF8; } .gap.none { color:#2A3D52; }
-  .detail { padding:6px 12px 8px 24px; font-size:10px; color:#5A7A95; background:#0A0F18; border-bottom:1px solid #141C28; line-height:1.6; }
-  .detail-name { color:#8AAAC8; font-weight:600; }
-  .detail-sep { margin:0 5px; color:#2A3D52; }
-  .detail-meta { color:#2E4055; margin-left:8px; }
-  .footer { padding:10px 12px; border-top:1px solid #161F2C; display:flex; gap:10px; font-size:9px; color:#2E4055; flex-wrap:wrap; align-items:center; }
-  .legend { display:flex; align-items:center; gap:4px; color:#4A6080; }
-  .legend-dot { width:6px; height:6px; border-radius:50%; }
-  .modal-overlay { position:fixed; top:0; left:0; right:0; bottom:0; background:rgba(0,0,0,.75); z-index:100; display:flex; align-items:center; justify-content:center; padding:16px; backdrop-filter:blur(4px); }
-  .modal { background:#111927; border:1px solid #1E2C3D; border-radius:12px; padding:24px; max-width:360px; width:100%; box-shadow:0 24px 64px rgba(0,0,0,.6); }
-  .modal h2 { color:#E8EDF5; font-size:15px; font-weight:700; margin-bottom:6px; }
-  .modal p { font-size:11px; color:#5A7A95; line-height:1.6; margin-bottom:16px; }
+  .gap { text-align:right; font-size:10px; font-weight:700; }
+  .gap.go { color:#10B981; } .gap.hot { color:#F59E0B; } .gap.wrm { color:#818CF8; } .gap.none { color:#2D3340; }
+  .detail { padding:4px 8px 6px 20px; font-size:9px; color:#5A6577; background:#0B0D12; border-bottom:1px solid #111318; line-height:1.5; }
+  .detail-name { color:#7A8899; font-weight:600; }
+  .detail-sep { margin:0 4px; color:#2A3040; }
+  .detail-meta { color:#2D3340; margin-left:6px; }
+  .footer { padding:8px; border-top:1px solid #0E1118; display:flex; gap:8px; font-size:7px; color:#1E2530; flex-wrap:wrap; align-items:center; }
+  .legend { display:flex; align-items:center; gap:3px; }
+  .legend-dot { width:5px; height:5px; border-radius:50%; }
+  .modal-overlay { position:fixed; top:0; left:0; right:0; bottom:0; background:rgba(0,0,0,.85); z-index:100; display:flex; align-items:center; justify-content:center; padding:16px; }
+  .modal { background:#12151C; border:1px solid #1E2530; border-radius:8px; padding:20px; max-width:340px; width:100%; }
+  .modal h2 { color:#E2E8F0; font-size:13px; margin-bottom:8px; }
+  .modal p { font-size:10px; color:#5A6577; line-height:1.5; margin-bottom:12px; }
   .modal a { color:#60A5FA; text-decoration:none; }
-  .modal a:hover { text-decoration:underline; }
-  .modal input[type=text] { width:100%; background:#0D1117; border:1px solid #1E2C3D; color:#C8D8E8; font-family:inherit; font-size:12px; padding:10px 12px; border-radius:7px; margin-bottom:12px; outline:none; transition:border-color .2s; }
-  .modal input[type=text]:focus { border-color:#2563EB; }
-  .modal .btn-save { background:#2563EB; color:#fff; border:none; border-radius:7px; padding:10px 16px; font-size:11px; font-weight:700; cursor:pointer; font-family:inherit; width:100%; transition:background .2s; }
-  .modal .btn-save:hover { background:#3B82F6; }
+  .modal input[type=text] { width:100%; background:#08090C; border:1px solid #1E2530; color:#C8D0DA; font-family:inherit; font-size:11px; padding:8px; border-radius:4px; margin-bottom:12px; outline:none; }
+  .modal .btn-save { background:#1D4ED8; color:#fff; border:none; border-radius:4px; padding:8px 16px; font-size:10px; font-weight:700; cursor:pointer; font-family:inherit; width:100%; }
   .modal .btn-save:disabled { opacity:.4; cursor:not-allowed; }
-  .error-msg { color:#F87171; font-size:10px; margin-bottom:10px; background:rgba(248,113,113,.08); padding:6px 10px; border-radius:5px; }
-  .radar-header { padding:7px 12px; font-size:10px; font-weight:700; color:#F97316; border-left:2px solid #F97316; background:rgba(249,115,22,.06); display:flex; justify-content:space-between; align-items:center; cursor:pointer; margin-top:4px; }
-  .radar-count { font-size:9px; color:#FB923C; }
-  .radar-toggle { font-size:9px; color:#5A7A95; }
-  .radar-row { display:grid; grid-template-columns:52px 60px 52px 1fr; padding:7px 12px 7px 20px; align-items:center; border-bottom:1px solid #10181F; }
-  .radar-ticker { font-size:11px; font-weight:700; color:#C8D8E8; }
-  .radar-price { font-size:11px; text-align:right; color:#8AAAC8; }
-  .radar-drop { font-size:11px; font-weight:700; text-align:right; color:#F87171; }
-  .radar-name { font-size:9px; text-align:right; color:#3A5570; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; padding-left:8px; }
-  .radar-scanning { padding:8px 20px; font-size:9px; color:#3A5570; }
-  .progress-bar { height:2px; background:#141C28; margin:0 12px; overflow:hidden; border-radius:2px; }
-  .progress-fill { height:100%; background:#F97316; transition:width 0.3s; border-radius:2px; }
-  .treasury-bar { display:flex; align-items:center; gap:0; padding:0 12px; height:26px; background:#0A0F18; border-bottom:1px solid #1E2C3D; overflow-x:auto; white-space:nowrap; }
-  .treasury-bar::-webkit-scrollbar { display:none; }
-  .t-label { font-size:8px; font-weight:700; color:#3A5570; letter-spacing:.5px; text-transform:uppercase; margin-right:10px; flex-shrink:0; }
-  .t-item { display:flex; align-items:center; gap:4px; margin-right:14px; flex-shrink:0; }
-  .t-tenor { font-size:8px; color:#4A6A85; font-weight:600; letter-spacing:.2px; }
-  .t-rate { font-size:11px; font-weight:700; color:#A78BFA; }
-  .t-rate.high { color:#F472B6; }
-  .t-rate.low { color:#7DD3FC; }
-  .t-rate.loading { color:#2A3D52; animation:pulse 1.5s infinite; }
-  .t-sep { color:#1E2C3D; font-size:10px; margin-right:10px; }
-  .t-curve { font-size:8px; font-weight:700; margin-left:4px; padding:2px 6px; border-radius:4px; }
-  .t-curve.normal { color:#34D399; background:rgba(52,211,153,.12); }
-  .t-curve.inverted { color:#F87171; background:rgba(248,113,113,.12); }
-  .t-curve.flat { color:#FBB040; background:rgba(251,176,64,.12); }
-  .modal-label { font-size:9px; font-weight:700; color:#4A6080; letter-spacing:.5px; text-transform:uppercase; margin-bottom:5px; display:block; }
-  .modal-divider { height:1px; background:#1E2C3D; margin:4px 0 14px; }
+  .error-msg { color:#EF4444; font-size:9px; margin-bottom:8px; }
+  .radar-header { padding:6px 8px; font-size:9px; font-weight:700; color:#F97316; border-left:2px solid #F97316; background:rgba(249,115,22,.05); display:flex; justify-content:space-between; align-items:center; cursor:pointer; margin-top:4px; }
+  .radar-count { font-size:8px; color:#FB923C; }
+  .radar-toggle { font-size:8px; color:#5A6577; }
+  .radar-row { display:grid; grid-template-columns:52px 60px 52px 64px; padding:5px 8px 5px 18px; align-items:center; border-bottom:1px solid #0E1118; }
+  .radar-ticker { font-size:10px; font-weight:700; color:#D4D4D8; }
+  .radar-price { font-size:10px; text-align:right; color:#9CA3AF; }
+  .radar-drop { font-size:10px; font-weight:700; text-align:right; color:#EF4444; }
+  .radar-name { font-size:8px; text-align:right; color:#3A4050; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+  .radar-scanning { padding:6px 18px; font-size:8px; color:#334; }
+  .progress-bar { height:2px; background:#111318; margin:0 8px; overflow:hidden; }
+  .progress-fill { height:100%; background:#F97316; transition:width 0.3s; }
 </style>
 </head>
 <body>
@@ -162,10 +137,8 @@ const BM = { 1:{label:"LIKELY DROP",color:"#EF4444"}, 2:{label:"COUNTER-INTUITIV
 
 // STATE
 let S = {
-  apiKey: "d6ittn9r01qleu95i6tgd6ittn9r01qleu95i6u0",
-  fredKey: "d89c1f35b1f2338af784ee9599731d52",
+  apiKey: localStorage.getItem("finnhub_key") || "",
   items: WATCHLIST.map(w => ({ ...w, cur:null, pc:null, dp:null, prevCur:null })),
-  treasuryRates: {},
   radarResults: [],
   radarOpen: true,
   radarScanning: false,
@@ -175,64 +148,26 @@ let S = {
 };
 
 async function fetchQuote(sym, key) {
-  for (let attempt = 0; attempt < 3; attempt++) {
-    try {
-      const r = await fetch("https://finnhub.io/api/v1/quote?symbol="+encodeURIComponent(sym)+"&token="+key);
-      if (r.status === 429) { await new Promise(r => setTimeout(r, 15000)); continue; }
-      if (!r.ok) throw new Error("HTTP "+r.status);
-      const d = await r.json();
-      if (d.c===0 && d.pc===0) throw new Error("No data");
-      return { current:d.c, prevClose:d.pc, change:d.d, changePct:d.dp };
-    } catch(e) {
-      if (attempt === 2) throw e;
-      await new Promise(r => setTimeout(r, 2000));
-    }
-  }
-}
-
-async function fetchBatch(items, key, onResult) {
-  await Promise.all(items.map(async entry => {
-    try {
-      const q = await fetchQuote(entry.t, key);
-      onResult(entry, q);
-    } catch(e) { console.warn("Skip "+entry.t+":", e.message); }
-  }));
-}
-
-const FRED_SERIES = [
-  { id:"DGS2",  label:"2Y" },
-  { id:"DGS3",  label:"3Y" },
-  { id:"DGS5",  label:"5Y" },
-  { id:"DGS7",  label:"7Y" },
-  { id:"DGS10", label:"10Y" },
-];
-
-async function fetchTreasury() {
-  if (!S.fredKey) return;
-  const results = {};
-  await Promise.all(FRED_SERIES.map(async s => {
-    try {
-      const url = "https://api.stlouisfed.org/fred/series/observations?series_id="+s.id
-        +"&api_key="+S.fredKey+"&file_type=json&limit=10&sort_order=desc";
-      const r = await fetch(url);
-      if (!r.ok) throw new Error("HTTP "+r.status);
-      const d = await r.json();
-      const obs = (d.observations||[]).find(o => o.value !== ".");
-      if (obs) results[s.id] = parseFloat(obs.value);
-    } catch(e) { console.warn("FRED "+s.id+":", e.message); }
-  }));
-  S.treasuryRates = results;
+  const r = await fetch("https://finnhub.io/api/v1/quote?symbol="+encodeURIComponent(sym)+"&token="+key);
+  if (!r.ok) throw new Error("HTTP "+r.status);
+  const d = await r.json();
+  if (d.c===0 && d.pc===0) throw new Error("No data");
+  return { current:d.c, prevClose:d.pc, change:d.d, changePct:d.dp };
 }
 
 async function refreshWatchlist() {
   S.items.forEach(i => { if (i.cur !== null) i.prevCur = i.cur; });
   let ok = 0;
-  // Fire all watchlist quotes concurrently — 19 calls, well within 60/min
-  await fetchBatch(S.items, S.apiKey, (entry, q) => {
-    const item = S.items.find(i => i.t === entry.t);
-    if (item) { item.cur = q.current; item.pc = q.prevClose; item.dp = q.changePct; ok++; }
-  });
-  render();
+  for (const item of S.items) {
+    try {
+      const q = await fetchQuote(item.t, S.apiKey);
+      item.cur = q.current; item.pc = q.prevClose; item.dp = q.changePct; ok++;
+    } catch(e) {
+      console.warn("Failed "+item.t+":", e.message);
+      if (ok===0 && (e.message.includes("403")||e.message.includes("401"))) { S.error="Invalid API key"; break; }
+    }
+    await new Promise(r => setTimeout(r, 50));
+  }
   return ok;
 }
 
@@ -240,23 +175,21 @@ async function scanRadar() {
   S.radarScanning = true; S.radarProgress = 0; S.radarResults = []; render();
   const total = RADAR_UNIVERSE.length;
   const hits = [];
-  const BATCH = 8;
-  // Watchlist used ~19 calls; radar gets remaining ~41 before needing to wait
-  // Batches of 8 with 12s gaps = safe under 60/min rolling window
-  for (let i = 0; i < total; i += BATCH) {
-    const batch = RADAR_UNIVERSE.slice(i, i + BATCH);
-    await fetchBatch(batch, S.apiKey, (entry, q) => {
+  for (let i = 0; i < total; i++) {
+    const entry = RADAR_UNIVERSE[i];
+    try {
+      const q = await fetchQuote(entry.t, S.apiKey);
       if (q.changePct !== null && q.changePct <= RADAR_THRESHOLD) {
         hits.push({ t:entry.t, n:entry.n, cur:q.current, pc:q.prevClose, dp:q.changePct });
       }
-    });
-    S.radarProgress = Math.round(Math.min(i + BATCH, total) / total * 100);
-    hits.sort((a,b) => a.dp - b.dp);
-    S.radarResults = [...hits];
-    render();
-    if (i + BATCH < total) await new Promise(r => setTimeout(r, 12000));
+    } catch(e) { console.warn("Radar skip "+entry.t+":", e.message); }
+    S.radarProgress = Math.round(((i+1)/total)*100);
+    await new Promise(r => setTimeout(r, 50));
+    if ((i+1) % 55 === 0) await new Promise(r => setTimeout(r, 5000));
+    if (i % 10 === 0) render();
   }
-  S.radarScanning = false; render();
+  hits.sort((a,b) => a.dp - b.dp);
+  S.radarResults = hits; S.radarScanning = false; render();
 }
 
 async function refreshAll() {
@@ -265,7 +198,6 @@ async function refreshAll() {
   const ok = await refreshWatchlist();
   if (ok > 0) S.lastUpdated = new Date();
   S.loading = false; render();
-  fetchTreasury().then(() => render());
   await scanRadar();
 }
 
@@ -287,6 +219,15 @@ function render() {
   const hotN = S.items.filter(i => sig(i.cur,i.tgt)==='HOT').length;
   let h = '';
 
+  if (!S.apiKey) {
+    h += '<div class="modal-overlay"><div class="modal">'
+      +'<h2>Finnhub API Key</h2>'
+      +'<p>Free real-time US stock quotes. Get yours at <a href="https://finnhub.io/register" target="_blank">finnhub.io/register</a></p>'
+      +(S.error?'<div class="error-msg">'+S.error+'</div>':'')
+      +'<input type="text" id="apiKeyInput" placeholder="Paste your API key here" />'
+      +'<button class="btn-save" id="saveKey">CONNECT</button>'
+      +'</div></div>';
+  }
 
   h += '<div class="header"><div class="header-left">'
     +'<span class="title">CRISIS</span><span class="badge">IRAN·HORMUZ</span>'
@@ -302,37 +243,7 @@ function render() {
     +'</div></div>';
 
   if (S.lastUpdated) h += '<div class="updated">'+S.lastUpdated.toLocaleTimeString()+'</div>';
-
-  // TREASURY BANNER
-  if (S.fredKey) {
-    const rates = S.treasuryRates;
-    const hasRates = Object.keys(rates).length > 0;
-    const r2  = rates["DGS2"];
-    const r10 = rates["DGS10"];
-    let curveLabel = '', curveClass = '';
-    if (r2 != null && r10 != null) {
-      const spread = r10 - r2;
-      if (spread > 0.15)      { curveLabel = '▲ NORMAL'; curveClass = 'normal'; }
-      else if (spread < -0.05){ curveLabel = '▼ INVERTED'; curveClass = 'inverted'; }
-      else                     { curveLabel = '→ FLAT'; curveClass = 'flat'; }
-    }
-    h += '<div class="treasury-bar"><span class="t-label">UST</span>';
-    FRED_SERIES.forEach(s => {
-      const v = rates[s.id];
-      let cls = 'loading';
-      if (v != null) {
-        const max = Math.max(...Object.values(rates).filter(x=>x!=null));
-        const min = Math.min(...Object.values(rates).filter(x=>x!=null));
-        cls = v===max ? 'high' : v===min ? 'low' : '';
-      }
-      h += '<div class="t-item"><span class="t-tenor">'+s.label+'</span>'
-        +'<span class="t-rate '+cls+'">'+(v!=null ? v.toFixed(2)+'%' : '···')+'</span>'
-        +'</div>';
-    });
-    if (curveLabel) h += '<span class="t-sep">|</span><span class="t-curve '+curveClass+'">'+curveLabel+'</span>';
-    h += '</div>';
-  }
-  if (S.error && S.apiKey) h += '<div style="padding:5px 12px;font-size:10px;color:#F87171;background:rgba(248,113,113,.08);border-bottom:1px solid #2A1A1A">'+S.error+'</div>';
+  if (S.error && S.apiKey) h += '<div style="padding:4px 8px;font-size:9px;color:#EF4444;background:#1C1017">'+S.error+'</div>';
 
   h += '<div class="col-header"><span></span><span>TICK</span><span style="text-align:right">NOW</span><span style="text-align:right">TGT</span><span style="text-align:right">GAP</span></div>';
 
@@ -404,10 +315,11 @@ function render() {
 
   // FOOTER
   h += '<div class="footer">'
-    +'<span class="legend"><span class="legend-dot" style="background:#34D399"></span>GO</span>'
-    +'<span class="legend"><span class="legend-dot" style="background:#FBB040"></span>HOT</span>'
-    +'<span class="legend"><span class="legend-dot" style="background:#818CF8"></span>WRM</span>'
+    +'<span class="legend"><span class="legend-dot" style="background:#10B981"></span>GO</span>'
+    +'<span class="legend"><span class="legend-dot" style="background:#F59E0B"></span>HOT</span>'
+    +'<span class="legend"><span class="legend-dot" style="background:#6366F1"></span>WRM</span>'
     +'<span>\u00b7 Tap row \u00b7 Finnhub RT</span>'
+    +(S.apiKey?'<span style="cursor:pointer;color:#334" id="changeKey">\uD83D\uDD11</span>':'')
     +'</div>';
 
   app.innerHTML = h;
@@ -416,6 +328,13 @@ function render() {
 
 // EVENT BINDING
 function bindEvents() {
+  const sk = document.getElementById("saveKey");
+  if (sk) sk.addEventListener("click", async () => {
+    const inp = document.getElementById("apiKeyInput"); const k = inp.value.trim(); if(!k) return;
+    sk.disabled=true; sk.textContent="Testing...";
+    try { await fetchQuote("AAPL",k); S.apiKey=k; localStorage.setItem("finnhub_key",k); S.error=null; render(); refreshAll(); }
+    catch(e) { S.error="Invalid key or connection error."; sk.disabled=false; sk.textContent="CONNECT"; render(); }
+  });
   const rb = document.getElementById("refreshBtn");
   if (rb) rb.addEventListener("click", refreshAll);
   const ab = document.getElementById("autoBtn");
@@ -437,13 +356,15 @@ function bindEvents() {
     });
     inp.addEventListener("click", e => e.stopPropagation());
   });
+  const ck = document.getElementById("changeKey");
+  if (ck) ck.addEventListener("click", () => { S.apiKey=""; localStorage.removeItem("finnhub_key"); clearInterval(S.autoInterval); S.autoRefresh=false; render(); });
   const rt = document.getElementById("radarToggle");
   if (rt) rt.addEventListener("click", () => { S.radarOpen = !S.radarOpen; render(); });
 }
 
 // INIT
 render();
-refreshAll();
+if (S.apiKey) refreshAll();
 </script>
 </body>
 </html>
