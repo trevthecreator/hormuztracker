@@ -1,0 +1,449 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="theme-color" content="#0D1117">
+<title>Crisis Tracker</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { background: #0D1117; color: #8BA0B8; font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; min-height: 100vh; min-height: 100dvh; overflow-x: hidden; -webkit-font-smoothing: antialiased; }
+  ::-webkit-scrollbar { display: none; }
+  input[type=number]::-webkit-inner-spin-button { -webkit-appearance: none; }
+  input[type=number] { -moz-appearance: textfield; }
+  @keyframes pulse { 0%,100%{opacity:1}50%{opacity:.4} }
+  @keyframes goBorder { 0%,100%{box-shadow:inset 0 0 0 1px rgba(52,211,153,.2)} 50%{box-shadow:inset 0 0 0 1px rgba(52,211,153,.6),0 0 8px rgba(52,211,153,.1)} }
+  .header { padding:10px 12px 8px; border-bottom:1px solid #1E2C3D; display:flex; justify-content:space-between; align-items:center; position:sticky; top:0; background:#0D1117; z-index:20; }
+  .header-left { display:flex; align-items:center; gap:8px; }
+  .header-right { display:flex; gap:5px; align-items:center; }
+  .title { font-size:13px; font-weight:700; color:#E8EDF5; letter-spacing:-.2px; }
+  .badge { font-size:9px; color:#4A6080; background:#151E2B; padding:2px 6px; border-radius:4px; font-weight:600; }
+  .auto-dot { width:6px; height:6px; border-radius:50%; background:#34D399; animation:pulse 1.5s infinite; }
+  .go-count { font-size:9px; font-weight:700; color:#34D399; animation:pulse 2s infinite; }
+  .hot-count { font-size:9px; font-weight:700; color:#FBB040; }
+  .btn { border:none; border-radius:5px; font-size:9px; font-weight:700; cursor:pointer; font-family:inherit; padding:4px 10px; }
+  .btn-refresh { background:#2563EB; color:#fff; }
+  .btn-refresh.loading { background:#1A2535; color:#4A6080; }
+  .btn-auto { background:#1A2535; color:#4A6080; padding:4px 8px; }
+  .btn-auto.active { background:#0D3B2C; color:#6EE7B7; }
+  .btn-sort { background:transparent; color:#344860; border:none; padding:3px 6px; border-radius:4px; font-size:8px; cursor:pointer; font-family:inherit; text-transform:uppercase; font-weight:700; letter-spacing:.4px; }
+  .btn-sort.active { background:#192744; color:#7CB3F5; }
+  .updated { padding:2px 12px 3px; font-size:9px; color:#2E4055; }
+  .col-header { display:grid; grid-template-columns:10px 52px 60px 60px 46px; padding:5px 12px; font-size:8px; font-weight:700; color:#344860; letter-spacing:.6px; text-transform:uppercase; border-bottom:1px solid #161F2C; position:sticky; top:60px; background:#0D1117; z-index:10; }
+  .bucket-header { padding:6px 12px; font-size:9px; font-weight:700; border-left-width:2px; border-left-style:solid; background:rgba(255,255,255,.02); display:flex; justify-content:space-between; letter-spacing:.2px; }
+  .at-target { color:#34D399; font-size:8px; font-weight:700; }
+  .row { display:grid; grid-template-columns:10px 52px 60px 60px 46px; padding:8px 12px; align-items:center; cursor:pointer; border-bottom:1px solid #141C28; transition: background .1s; }
+  .row:hover { background:#131B27; }
+  .row.go { background:rgba(52,211,153,.08); animation:goBorder 2s infinite; }
+  .row.go:hover { background:rgba(52,211,153,.12); }
+  .row.hot { background:rgba(251,176,64,.05); }
+  .row.hot:hover { background:rgba(251,176,64,.08); }
+  .signal-dot { width:7px; height:7px; border-radius:50%; display:inline-block; flex-shrink:0; }
+  .signal-dot.go { background:#34D399; box-shadow:0 0 6px rgba(52,211,153,.7); }
+  .signal-dot.hot { background:#FBB040; box-shadow:0 0 4px rgba(251,176,64,.5); }
+  .signal-dot.wrm { background:#818CF8; }
+  .signal-dot.none { background:#1E2C3D; }
+  .ticker { font-size:12px; font-weight:700; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+  .ticker.go { color:#34D399; } .ticker.hot { color:#FCD34D; } .ticker.default { color:#C8D8E8; }
+  .now-cell { display:flex; flex-direction:column; align-items:flex-end; gap:1px; }
+  .now-input { background:transparent; border:none; border-bottom:1px dotted #253345; color:#D8E6F4; font-size:12px; font-family:inherit; padding:1px 0; width:58px; text-align:right; font-weight:600; }
+  .now-input:focus { outline:none; border-bottom-color:#4A7FAA; }
+  .delta { font-size:9px; font-weight:600; line-height:1; }
+  .delta.up { color:#34D399; } .delta.down { color:#F87171; }
+  .tgt { text-align:right; font-size:11px; font-weight:500; color:#5A7A95; }
+  .tgt.go { color:#34D399; }
+  .gap { text-align:right; font-size:11px; font-weight:700; }
+  .gap.go { color:#34D399; } .gap.hot { color:#FBB040; } .gap.wrm { color:#818CF8; } .gap.none { color:#2A3D52; }
+  .detail { padding:6px 12px 8px 24px; font-size:10px; color:#5A7A95; background:#0A0F18; border-bottom:1px solid #141C28; line-height:1.6; }
+  .detail-name { color:#8AAAC8; font-weight:600; }
+  .detail-sep { margin:0 5px; color:#2A3D52; }
+  .detail-meta { color:#2E4055; margin-left:8px; }
+  .footer { padding:10px 12px; border-top:1px solid #161F2C; display:flex; gap:10px; font-size:9px; color:#2E4055; flex-wrap:wrap; align-items:center; }
+  .legend { display:flex; align-items:center; gap:4px; color:#4A6080; }
+  .legend-dot { width:6px; height:6px; border-radius:50%; }
+  .modal-overlay { position:fixed; top:0; left:0; right:0; bottom:0; background:rgba(0,0,0,.75); z-index:100; display:flex; align-items:center; justify-content:center; padding:16px; backdrop-filter:blur(4px); }
+  .modal { background:#111927; border:1px solid #1E2C3D; border-radius:12px; padding:24px; max-width:360px; width:100%; box-shadow:0 24px 64px rgba(0,0,0,.6); }
+  .modal h2 { color:#E8EDF5; font-size:15px; font-weight:700; margin-bottom:6px; }
+  .modal p { font-size:11px; color:#5A7A95; line-height:1.6; margin-bottom:16px; }
+  .modal a { color:#60A5FA; text-decoration:none; }
+  .modal a:hover { text-decoration:underline; }
+  .modal input[type=text] { width:100%; background:#0D1117; border:1px solid #1E2C3D; color:#C8D8E8; font-family:inherit; font-size:12px; padding:10px 12px; border-radius:7px; margin-bottom:12px; outline:none; transition:border-color .2s; }
+  .modal input[type=text]:focus { border-color:#2563EB; }
+  .modal .btn-save { background:#2563EB; color:#fff; border:none; border-radius:7px; padding:10px 16px; font-size:11px; font-weight:700; cursor:pointer; font-family:inherit; width:100%; transition:background .2s; }
+  .modal .btn-save:hover { background:#3B82F6; }
+  .modal .btn-save:disabled { opacity:.4; cursor:not-allowed; }
+  .error-msg { color:#F87171; font-size:10px; margin-bottom:10px; background:rgba(248,113,113,.08); padding:6px 10px; border-radius:5px; }
+  .radar-header { padding:7px 12px; font-size:10px; font-weight:700; color:#F97316; border-left:2px solid #F97316; background:rgba(249,115,22,.06); display:flex; justify-content:space-between; align-items:center; cursor:pointer; margin-top:4px; }
+  .radar-count { font-size:9px; color:#FB923C; }
+  .radar-toggle { font-size:9px; color:#5A7A95; }
+  .radar-row { display:grid; grid-template-columns:52px 60px 52px 1fr; padding:7px 12px 7px 20px; align-items:center; border-bottom:1px solid #10181F; }
+  .radar-ticker { font-size:11px; font-weight:700; color:#C8D8E8; }
+  .radar-price { font-size:11px; text-align:right; color:#8AAAC8; }
+  .radar-drop { font-size:11px; font-weight:700; text-align:right; color:#F87171; }
+  .radar-name { font-size:9px; text-align:right; color:#3A5570; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; padding-left:8px; }
+  .radar-scanning { padding:8px 20px; font-size:9px; color:#3A5570; }
+  .progress-bar { height:2px; background:#141C28; margin:0 12px; overflow:hidden; border-radius:2px; }
+  .progress-fill { height:100%; background:#F97316; transition:width 0.3s; border-radius:2px; }
+  .treasury-bar { display:flex; align-items:center; gap:0; padding:0 12px; height:26px; background:#0A0F18; border-bottom:1px solid #1E2C3D; overflow-x:auto; white-space:nowrap; }
+  .treasury-bar::-webkit-scrollbar { display:none; }
+  .t-label { font-size:8px; font-weight:700; color:#3A5570; letter-spacing:.5px; text-transform:uppercase; margin-right:10px; flex-shrink:0; }
+  .t-item { display:flex; align-items:center; gap:4px; margin-right:14px; flex-shrink:0; }
+  .t-tenor { font-size:8px; color:#4A6A85; font-weight:600; letter-spacing:.2px; }
+  .t-rate { font-size:11px; font-weight:700; color:#A78BFA; }
+  .t-rate.high { color:#F472B6; }
+  .t-rate.low { color:#7DD3FC; }
+  .t-rate.loading { color:#2A3D52; animation:pulse 1.5s infinite; }
+  .t-sep { color:#1E2C3D; font-size:10px; margin-right:10px; }
+  .t-curve { font-size:8px; font-weight:700; margin-left:4px; padding:2px 6px; border-radius:4px; }
+  .t-curve.normal { color:#34D399; background:rgba(52,211,153,.12); }
+  .t-curve.inverted { color:#F87171; background:rgba(248,113,113,.12); }
+  .t-curve.flat { color:#FBB040; background:rgba(251,176,64,.12); }
+  .modal-label { font-size:9px; font-weight:700; color:#4A6080; letter-spacing:.5px; text-transform:uppercase; margin-bottom:5px; display:block; }
+  .modal-divider { height:1px; background:#1E2C3D; margin:4px 0 14px; }
+</style>
+</head>
+<body>
+<div id="app"></div>
+<script>
+
+// WATCHLIST
+const WATCHLIST = [
+  { t:"GOOGL", n:"Alphabet", b:1, tgt:295, p:1, r:"Tech rotation. Zero ME exposure." },
+  { t:"AMZN", n:"Amazon", b:1, tgt:200, p:2, r:"AWS untouched. Cloud on sale." },
+  { t:"JPM", n:"JPMorgan", b:1, tgt:287, p:3, r:"Benefits from vol & rates." },
+  { t:"VICI", n:"VICI Props", b:1, tgt:28.75, p:4, r:"Casino REIT, rate fear only." },
+  { t:"NNN", n:"NNN REIT", b:1, tgt:43.25, p:5, r:"Triple-net. 5.3% yield." },
+  { t:"ABBV", n:"AbbVie", b:1, tgt:222, p:6, r:"Pharma defensive." },
+  { t:"BRK.B", n:"Berkshire", b:1, tgt:490, p:7, r:"Fortress. Back up truck." },
+  { t:"IBM", n:"IBM", b:1, tgt:220, p:8, r:"Down 22% YTD. Hold, don't chase." },
+  { t:"NEM", n:"Newmont", b:2, tgt:122, p:1, r:"Margin-call cascade risk." },
+  { t:"FNV", n:"Franco-Nev", b:2, tgt:265, p:2, r:"Gold royalty forced liq." },
+  { t:"XOM", n:"Exxon", b:2, tgt:148, p:3, r:"Gap-up then retrace." },
+  { t:"LMT", n:"Lockheed", b:2, tgt:635, p:4, r:"De-escalation whipsaw." },
+  { t:"CAT", n:"Caterpillar", b:3, tgt:690, p:1, r:"Cyclical fear selloff. 17x P/E." },
+  { t:"CVX", n:"Chevron", b:3, tgt:175, p:2, r:"Oil diversification. 3.8% yield." },
+  { t:"RTX", n:"RTX", b:3, tgt:193, p:3, r:"Tomahawk maker. Buy de-escalation dip." },
+  { t:"V", n:"Visa", b:3, tgt:300, p:4, r:"Best biz. -14% off ATH." },
+  { t:"AEM", n:"Agnico Eagle", b:3, tgt:228, p:5, r:"Best gold miner. Tier 1." },
+  { t:"GD", n:"Gen Dynamics", b:3, tgt:335, p:6, r:"Subs, tanks, Gulfstream." },
+  { t:"RGLD", n:"Royal Gold", b:3, tgt:275, p:7, r:"Gold royalty/streaming." },
+];
+const RADAR_UNIVERSE = [
+  { t:"MSFT", n:"Microsoft" }, { t:"AAPL", n:"Apple" }, { t:"JNJ", n:"J&J" },
+  { t:"PG", n:"Procter Gamble" }, { t:"KO", n:"Coca-Cola" }, { t:"PEP", n:"PepsiCo" },
+  { t:"MCD", n:"McDonalds" }, { t:"WMT", n:"Walmart" }, { t:"COST", n:"Costco" },
+  { t:"HD", n:"Home Depot" }, { t:"LOW", n:"Lowes" }, { t:"CL", n:"Colgate" },
+  { t:"MMM", n:"3M" }, { t:"SHW", n:"Sherwin-Williams" }, { t:"ITW", n:"Illinois Tool" },
+  { t:"EMR", n:"Emerson" }, { t:"META", n:"Meta" }, { t:"NVDA", n:"Nvidia" },
+  { t:"AVGO", n:"Broadcom" }, { t:"CRM", n:"Salesforce" }, { t:"ADBE", n:"Adobe" },
+  { t:"ORCL", n:"Oracle" }, { t:"CSCO", n:"Cisco" }, { t:"TXN", n:"Texas Inst" },
+  { t:"INTC", n:"Intel" }, { t:"QCOM", n:"Qualcomm" }, { t:"AMAT", n:"Applied Mat" },
+  { t:"NOW", n:"ServiceNow" }, { t:"HON", n:"Honeywell" }, { t:"UNP", n:"Union Pacific" },
+  { t:"UPS", n:"UPS" }, { t:"DE", n:"Deere" }, { t:"BA", n:"Boeing" },
+  { t:"NOC", n:"Northrop" }, { t:"GE", n:"GE Aerospace" }, { t:"WM", n:"Waste Mgmt" },
+  { t:"ETN", n:"Eaton" }, { t:"PH", n:"Parker Hannifin" }, { t:"FDX", n:"FedEx" },
+  { t:"O", n:"Realty Income" }, { t:"AMT", n:"American Tower" }, { t:"PLD", n:"Prologis" },
+  { t:"SPG", n:"Simon Property" }, { t:"PSA", n:"Public Storage" }, { t:"DLR", n:"Digital Realty" },
+  { t:"WPC", n:"W.P. Carey" }, { t:"GS", n:"Goldman Sachs" }, { t:"MS", n:"Morgan Stanley" },
+  { t:"BLK", n:"BlackRock" }, { t:"SCHW", n:"Schwab" }, { t:"AXP", n:"Amex" },
+  { t:"CB", n:"Chubb" }, { t:"TRV", n:"Travelers" }, { t:"PGR", n:"Progressive" },
+  { t:"UNH", n:"UnitedHealth" }, { t:"LLY", n:"Eli Lilly" }, { t:"PFE", n:"Pfizer" },
+  { t:"MRK", n:"Merck" }, { t:"TMO", n:"Thermo Fisher" }, { t:"MDT", n:"Medtronic" },
+  { t:"ISRG", n:"Intuitive Surg" }, { t:"SYK", n:"Stryker" },
+  { t:"COP", n:"ConocoPhillips" }, { t:"SLB", n:"Schlumberger" }, { t:"EOG", n:"EOG Resources" },
+  { t:"FCX", n:"Freeport McMoRan" }, { t:"APD", n:"Air Products" }, { t:"LIN", n:"Linde" },
+];
+const RADAR_THRESHOLD = -3;
+const BM = { 1:{label:"LIKELY DROP",color:"#EF4444"}, 2:{label:"COUNTER-INTUITIVE",color:"#3B82F6"}, 3:{label:"NEW POSITIONS",color:"#10B981"} };
+
+// STATE
+let S = {
+  apiKey: "d6ittn9r01qleu95i6tgd6ittn9r01qleu95i6u0",
+  fredKey: "d89c1f35b1f2338af784ee9599731d52",
+  items: WATCHLIST.map(w => ({ ...w, cur:null, pc:null, dp:null, prevCur:null })),
+  treasuryRates: {},
+  radarResults: [],
+  radarOpen: true,
+  radarScanning: false,
+  radarProgress: 0,
+  loading: false, lastUpdated:null, sort:"bucket",
+  autoRefresh:false, autoInterval:null, expanded:null, error:null,
+};
+
+async function fetchQuote(sym, key) {
+  for (let attempt = 0; attempt < 3; attempt++) {
+    try {
+      const r = await fetch("https://finnhub.io/api/v1/quote?symbol="+encodeURIComponent(sym)+"&token="+key);
+      if (r.status === 429) { await new Promise(r => setTimeout(r, 15000)); continue; }
+      if (!r.ok) throw new Error("HTTP "+r.status);
+      const d = await r.json();
+      if (d.c===0 && d.pc===0) throw new Error("No data");
+      return { current:d.c, prevClose:d.pc, change:d.d, changePct:d.dp };
+    } catch(e) {
+      if (attempt === 2) throw e;
+      await new Promise(r => setTimeout(r, 2000));
+    }
+  }
+}
+
+async function fetchBatch(items, key, onResult) {
+  await Promise.all(items.map(async entry => {
+    try {
+      const q = await fetchQuote(entry.t, key);
+      onResult(entry, q);
+    } catch(e) { console.warn("Skip "+entry.t+":", e.message); }
+  }));
+}
+
+const FRED_SERIES = [
+  { id:"DGS2",  label:"2Y" },
+  { id:"DGS3",  label:"3Y" },
+  { id:"DGS5",  label:"5Y" },
+  { id:"DGS7",  label:"7Y" },
+  { id:"DGS10", label:"10Y" },
+];
+
+async function fetchTreasury() {
+  if (!S.fredKey) return;
+  const results = {};
+  await Promise.all(FRED_SERIES.map(async s => {
+    try {
+      const url = "https://api.stlouisfed.org/fred/series/observations?series_id="+s.id
+        +"&api_key="+S.fredKey+"&file_type=json&limit=10&sort_order=desc";
+      const r = await fetch(url);
+      if (!r.ok) throw new Error("HTTP "+r.status);
+      const d = await r.json();
+      const obs = (d.observations||[]).find(o => o.value !== ".");
+      if (obs) results[s.id] = parseFloat(obs.value);
+    } catch(e) { console.warn("FRED "+s.id+":", e.message); }
+  }));
+  S.treasuryRates = results;
+}
+
+async function refreshWatchlist() {
+  S.items.forEach(i => { if (i.cur !== null) i.prevCur = i.cur; });
+  let ok = 0;
+  // Fire all watchlist quotes concurrently — 19 calls, well within 60/min
+  await fetchBatch(S.items, S.apiKey, (entry, q) => {
+    const item = S.items.find(i => i.t === entry.t);
+    if (item) { item.cur = q.current; item.pc = q.prevClose; item.dp = q.changePct; ok++; }
+  });
+  render();
+  return ok;
+}
+
+async function scanRadar() {
+  S.radarScanning = true; S.radarProgress = 0; S.radarResults = []; render();
+  const total = RADAR_UNIVERSE.length;
+  const hits = [];
+  const BATCH = 8;
+  // Watchlist used ~19 calls; radar gets remaining ~41 before needing to wait
+  // Batches of 8 with 12s gaps = safe under 60/min rolling window
+  for (let i = 0; i < total; i += BATCH) {
+    const batch = RADAR_UNIVERSE.slice(i, i + BATCH);
+    await fetchBatch(batch, S.apiKey, (entry, q) => {
+      if (q.changePct !== null && q.changePct <= RADAR_THRESHOLD) {
+        hits.push({ t:entry.t, n:entry.n, cur:q.current, pc:q.prevClose, dp:q.changePct });
+      }
+    });
+    S.radarProgress = Math.round(Math.min(i + BATCH, total) / total * 100);
+    hits.sort((a,b) => a.dp - b.dp);
+    S.radarResults = [...hits];
+    render();
+    if (i + BATCH < total) await new Promise(r => setTimeout(r, 12000));
+  }
+  S.radarScanning = false; render();
+}
+
+async function refreshAll() {
+  if (!S.apiKey) return;
+  S.loading = true; S.error = null; render();
+  const ok = await refreshWatchlist();
+  if (ok > 0) S.lastUpdated = new Date();
+  S.loading = false; render();
+  fetchTreasury().then(() => render());
+  await scanRadar();
+}
+
+const disc = (c,t) => ((c-t)/t)*100;
+function sig(c,t) { if(c===null) return ""; const p=disc(c,t); return p<=0?"GO":p<=2?"HOT":p<=5?"WRM":""; }
+function getSorted() {
+  const a = [...S.items];
+  if (S.sort==="disc") return a.sort((x,y) => { if(x.cur===null&&y.cur===null)return 0; if(x.cur===null)return 1; if(y.cur===null)return -1; return disc(x.cur,x.tgt)-disc(y.cur,y.tgt); });
+  if (S.sort==="sig") { const o={GO:0,HOT:1,WRM:2,"":3}; return a.sort((x,y) => o[sig(x.cur,x.tgt)]-o[sig(y.cur,y.tgt)]); }
+  return a.sort((x,y) => x.b-y.b||x.p-y.p);
+}
+function fmt(p) { return p===null?"\u2014":p<50?p.toFixed(2):p.toFixed(0); }
+
+// RENDER
+function render() {
+  const app = document.getElementById('app');
+  const sorted = getSorted();
+  const goN = S.items.filter(i => sig(i.cur,i.tgt)==='GO').length;
+  const hotN = S.items.filter(i => sig(i.cur,i.tgt)==='HOT').length;
+  let h = '';
+
+
+  h += '<div class="header"><div class="header-left">'
+    +'<span class="title">CRISIS</span><span class="badge">IRAN·HORMUZ</span>'
+    +(S.autoRefresh?'<span class="auto-dot"></span>':'')
+    +(goN>0?'<span class="go-count">'+goN+'GO</span>':'')
+    +(hotN>0?'<span class="hot-count">'+hotN+'HOT</span>':'')
+    +'</div><div class="header-right">'
+    +'<button class="btn btn-refresh'+(S.loading?' loading':'')+'" id="refreshBtn"'+(S.loading?' disabled':'')+'>'+(S.loading?'···':'⟳')+'</button>'
+    +'<button class="btn btn-auto'+(S.autoRefresh?' active':'')+'" id="autoBtn">'+(S.autoRefresh?'A·ON':'A')+'</button>'
+    +'<button class="btn-sort'+(S.sort==='bucket'?' active':'')+'" data-sort="bucket">BKT</button>'
+    +'<button class="btn-sort'+(S.sort==='disc'?' active':'')+'" data-sort="disc">DSC</button>'
+    +'<button class="btn-sort'+(S.sort==='sig'?' active':'')+'" data-sort="sig">SIG</button>'
+    +'</div></div>';
+
+  if (S.lastUpdated) h += '<div class="updated">'+S.lastUpdated.toLocaleTimeString()+'</div>';
+
+  // TREASURY BANNER
+  if (S.fredKey) {
+    const rates = S.treasuryRates;
+    const hasRates = Object.keys(rates).length > 0;
+    const r2  = rates["DGS2"];
+    const r10 = rates["DGS10"];
+    let curveLabel = '', curveClass = '';
+    if (r2 != null && r10 != null) {
+      const spread = r10 - r2;
+      if (spread > 0.15)      { curveLabel = '▲ NORMAL'; curveClass = 'normal'; }
+      else if (spread < -0.05){ curveLabel = '▼ INVERTED'; curveClass = 'inverted'; }
+      else                     { curveLabel = '→ FLAT'; curveClass = 'flat'; }
+    }
+    h += '<div class="treasury-bar"><span class="t-label">UST</span>';
+    FRED_SERIES.forEach(s => {
+      const v = rates[s.id];
+      let cls = 'loading';
+      if (v != null) {
+        const max = Math.max(...Object.values(rates).filter(x=>x!=null));
+        const min = Math.min(...Object.values(rates).filter(x=>x!=null));
+        cls = v===max ? 'high' : v===min ? 'low' : '';
+      }
+      h += '<div class="t-item"><span class="t-tenor">'+s.label+'</span>'
+        +'<span class="t-rate '+cls+'">'+(v!=null ? v.toFixed(2)+'%' : '···')+'</span>'
+        +'</div>';
+    });
+    if (curveLabel) h += '<span class="t-sep">|</span><span class="t-curve '+curveClass+'">'+curveLabel+'</span>';
+    h += '</div>';
+  }
+  if (S.error && S.apiKey) h += '<div style="padding:5px 12px;font-size:10px;color:#F87171;background:rgba(248,113,113,.08);border-bottom:1px solid #2A1A1A">'+S.error+'</div>';
+
+  h += '<div class="col-header"><span></span><span>TICK</span><span style="text-align:right">NOW</span><span style="text-align:right">TGT</span><span style="text-align:right">GAP</span></div>';
+
+  function renderRow(item) {
+    const s = sig(item.cur,item.tgt);
+    const d = item.cur!==null?disc(item.cur,item.tgt):null;
+    const rc = s==="GO"?"go":s==="HOT"?"hot":"";
+    const tc = s==="GO"?"go":s==="HOT"?"hot":"default";
+    let dH = "";
+    if (item.prevCur!==null && item.cur!==null && item.prevCur!==item.cur) {
+      const dp = ((item.cur-item.prevCur)/item.prevCur)*100;
+      dH = '<span class="delta '+(dp>0?'up':'down')+'">'+(dp>0?'↑':'↓')+Math.abs(dp).toFixed(1)+'%</span>';
+    } else if (item.dp!==null && Math.abs(item.dp)>0.005) {
+      const dp = item.dp;
+      dH = '<span class="delta '+(dp>0?'up':'down')+'">'+(dp>0?'↑':'↓')+Math.abs(dp).toFixed(1)+'%</span>';
+    }
+    const gt = d!==null?(d<=0?'✓':'')+(-d).toFixed(1)+'%':'—';
+    const gc = d===null?"none":d<=0?"go":d<=2?"hot":d<=5?"wrm":"none";
+    let rr = '<div class="row '+rc+'" data-ticker="'+item.t+'">'
+      +'<span class="signal-dot '+(s==="GO"?"go":s==="HOT"?"hot":s==="WRM"?"wrm":"none")+'"></span>'
+      +'<span class="ticker '+tc+'">'+item.t+'</span>'
+      +'<div class="now-cell"><input type="number" step="0.01" class="now-input" data-ticker="'+item.t+'" value="'+(item.cur!==null?item.cur:'')+'" placeholder="—" />'+dH+'</div>'
+      +'<span class="tgt'+(s==="GO"?' go':'')+'">'+fmt(item.tgt)+'</span>'
+      +'<span class="gap '+gc+'">'+gt+'</span></div>';
+    if (S.expanded===item.t) {
+      const pcH = item.pc?'<span class="detail-meta">Prev close $'+item.pc.toFixed(2)+'</span>':'';
+      rr += '<div class="detail"><span class="detail-name">'+item.n+'</span><span class="detail-sep">·</span>'+item.r+pcH+'</div>';
+    }
+    return rr;
+  }
+
+  if (S.sort==="bucket") {
+    [1,2,3].forEach(bn => {
+      const g = sorted.filter(i => i.b===bn);
+      const m = BM[bn];
+      const at = g.filter(i => sig(i.cur,i.tgt)==="GO").length;
+      h += '<div class="bucket-header" style="color:'+m.color+';border-left-color:'+m.color+'"><span>'+bn+'· '+m.label+'</span>'
+        +(at>0?'<span class="at-target">'+at+' TARGET</span>':'')+'</div>';
+      g.forEach(i => { h += renderRow(i); });
+    });
+  } else { sorted.forEach(i => { h += renderRow(i); }); }
+
+  // RADAR SECTION
+  const radarCount = S.radarResults.length;
+  const radarLabel = S.radarScanning ? 'SCANNING... '+S.radarProgress+'%' : (radarCount > 0 ? radarCount+' ALERT'+(radarCount>1?'S':'') : 'NO ALERTS');
+  
+  h += '<div class="radar-header" id="radarToggle">'
+    +'<span>⚠ RADAR · '+radarLabel+'</span>'
+    +'<span class="radar-toggle">'+(S.radarOpen?'▲':'▼')+'</span>'
+    +'</div>';
+
+  if (S.radarScanning) {
+    h += '<div class="progress-bar"><div class="progress-fill" style="width:'+S.radarProgress+'%"></div></div>';
+  }
+
+  if (S.radarOpen && !S.radarScanning) {
+    if (S.radarResults.length === 0 && S.lastUpdated) {
+      h += '<div class="radar-scanning">No tickers down more than 3% today in scan universe ('+RADAR_UNIVERSE.length+' stocks)</div>';
+    }
+    S.radarResults.forEach(r => {
+      h += '<div class="radar-row">'
+        +'<span class="radar-ticker">'+r.t+'</span>'
+        +'<span class="radar-price">$'+(r.cur<50?r.cur.toFixed(2):r.cur.toFixed(0))+'</span>'
+        +'<span class="radar-drop">↓'+Math.abs(r.dp).toFixed(1)+'%</span>'
+        +'<span class="radar-name">'+r.n+'</span>'
+        +'</div>';
+    });
+  }
+
+  // FOOTER
+  h += '<div class="footer">'
+    +'<span class="legend"><span class="legend-dot" style="background:#34D399"></span>GO</span>'
+    +'<span class="legend"><span class="legend-dot" style="background:#FBB040"></span>HOT</span>'
+    +'<span class="legend"><span class="legend-dot" style="background:#818CF8"></span>WRM</span>'
+    +'<span>\u00b7 Tap row \u00b7 Finnhub RT</span>'
+    +'</div>';
+
+  app.innerHTML = h;
+  bindEvents();
+}
+
+// EVENT BINDING
+function bindEvents() {
+  const rb = document.getElementById("refreshBtn");
+  if (rb) rb.addEventListener("click", refreshAll);
+  const ab = document.getElementById("autoBtn");
+  if (ab) ab.addEventListener("click", () => {
+    S.autoRefresh=!S.autoRefresh;
+    if(S.autoRefresh) S.autoInterval=setInterval(refreshAll,300000);
+    else { clearInterval(S.autoInterval); S.autoInterval=null; }
+    render();
+  });
+  document.querySelectorAll(".btn-sort").forEach(b => b.addEventListener("click", () => { S.sort=b.dataset.sort; render(); }));
+  document.querySelectorAll(".row").forEach(row => row.addEventListener("click", e => {
+    if(e.target.classList.contains("now-input")) return;
+    const t = row.dataset.ticker; S.expanded = S.expanded===t?null:t; render();
+  }));
+  document.querySelectorAll(".now-input").forEach(inp => {
+    inp.addEventListener("change", e => {
+      const t=e.target.dataset.ticker, v=parseFloat(e.target.value);
+      if(!isNaN(v)){ const it=S.items.find(i=>i.t===t); if(it){if(it.cur!==null)it.prevCur=it.cur; it.cur=v; S.lastUpdated=new Date(); render();} }
+    });
+    inp.addEventListener("click", e => e.stopPropagation());
+  });
+  const rt = document.getElementById("radarToggle");
+  if (rt) rt.addEventListener("click", () => { S.radarOpen = !S.radarOpen; render(); });
+}
+
+// INIT
+render();
+refreshAll();
+</script>
+</body>
+</html>
